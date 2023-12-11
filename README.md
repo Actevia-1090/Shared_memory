@@ -1,1 +1,3 @@
 # Shared_memory
+
+This C++ code creates a multi-threaded program that uses shared memory for communication between two threads. The program initializes a shared memory segment and two threads - one for writing data (Write_f) and another for reading data (Read_f). The threads synchronize their access to the shared memory using a mutex and a condition variable. The cleanup_and_exit function handles the cleanup process, detaching and removing the shared memory upon receiving a termination signal. The program runs until both threads complete their tasks, after which it cleans up the resources and exits. 
