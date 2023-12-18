@@ -9,7 +9,7 @@
 #include <mutex>
 #include <condition_variable>
 #include <csignal>
-
+enum Status {     STATUS_SUCCESS = 0,     STATUS_FAILURE = -1 };
 using namespace std;
 mutex mutex_m;
 condition_variable cv;
@@ -22,7 +22,7 @@ void cleanup_and_exit(int signal)
 {
     cout << "Received signal " << signal << endl<<". Cleaning up..." << endl;
     // Detaches the shared memory
-    if (shmdt(shared_message) == -1)
+    if (shmdt(shared_message) == STATUS_FAILURE)
     {
         perror("shmdt");
         exit(EXIT_FAILURE);
@@ -30,7 +30,7 @@ void cleanup_and_exit(int signal)
     // Removing the shared memory
     key_t key = ftok("/home/jayanth-1090/Desktop/sharedd.cpp", 'R');
     int shm_id = shmget(key, SHM_SIZE, 0666);
-    if (shm_id != -1)
+    if (shm_id != STATUS_FAILURE )
     {
         if (shmctl(shm_id, IPC_RMID, nullptr) == -1)
         {
@@ -79,7 +79,7 @@ void create_shared()
     // Generating a key such that the process that has this key can access the shared memory
     key_t key = ftok("/home/jayanth-1090/Desktop/sharedd.cpp", 'R');
     int shm_id = shmget(key, SHM_SIZE, IPC_CREAT | 0666);
-    if (shm_id == -1)
+    if (shm_id == STATUS_FAILURE)
     {
         perror("shmget");
         exit(EXIT_FAILURE);
@@ -103,25 +103,25 @@ int main()
     // Register the signal handler for cleaning up
     signal(SIGINT, cleanup_and_exit);
     // Creating threads to write and read data
-    if (pthread_create(&tid1, nullptr, Write_f, shared_message) != 0)
+    if (pthread_create(&tid1, nullptr, Write_f, shared_message) != STATUS_SUCCESS)
     {
         perror("pthread_create");
         cerr << "Error creating the thread" << endl;
         exit(EXIT_FAILURE);
     }
-    if (pthread_create(&tid2, nullptr, Read_f, shared_message) != 0)
+    if (pthread_create(&tid2, nullptr, Read_f, shared_message) != STATUS_SUCCESS )
     {
         perror("pthread_create");
         cerr << "Error creating the thread" << endl;
         exit(EXIT_FAILURE);
     }
     // Joining the threads
-    if (pthread_join(tid1, nullptr) != 0)
+    if (pthread_join(tid1, nullptr) != STATUS_SUCCESS)
     {
         perror("pthread_join");
         exit(EXIT_FAILURE);
     }
-    if (pthread_join(tid2, nullptr) != 0)
+    if (pthread_join(tid2, nullptr) != STATUS_SUCCESS)
     {
         perror("pthread_join");
         exit(EXIT_FAILURE);
